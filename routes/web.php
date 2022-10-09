@@ -1,9 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\TestController;
-use App\Http\Controllers\ContactFormController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,16 +13,22 @@ use App\Http\Controllers\ContactFormController;
 |
 */
 
+Route::get('tests/test', [TestController::class, 'index']);
+
+Route::prefix('contacts')
+->middleware(['auth'])
+->controller(ContactFormController::class)
+->name('contacts.')
+->group(function(){
+    Route::get('/', 'index')->name('index');
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('tests/test', [TestController::class, 'index']);
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::group(['prefix' => 'contact', 'middleware' => 'auth'], function(){
-    Route::get('index', [ContactFormController::class, 'index'])->name('contact.index');
-});
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+require __DIR__.'/auth.php';
